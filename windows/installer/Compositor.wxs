@@ -1,0 +1,29 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="Compositor for Windows"
+           Manufacturer="Compositor Windows Project"
+           Version="0.1.0"
+           UpgradeCode="1A59504E-20F1-43EB-A664-98EFD4C91E1E"
+           Scope="perMachine">
+    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Compositor">
+        <Component Id="ApplicationFiles" Guid="80F31E09-C274-41D0-BE90-0705ED014F98">
+          <File Id="CompositorExe" Source="$(AppSource)" KeyPath="yes">
+            <Shortcut Id="StartMenuShortcut"
+                      Directory="ProgramMenuFolder"
+                      Name="Compositor"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Advertise="yes" />
+          </File>
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="Compositor" Level="1">
+      <ComponentRef Id="ApplicationFiles" />
+    </Feature>
+  </Package>
+</Wix>
+
