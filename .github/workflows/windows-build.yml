@@ -1,0 +1,46 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main, windows-port]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S windows -B out/windows -A x64
+
+      - name: Build
+        run: cmake --build out/windows --config Release --parallel
+
+      - name: Test
+        run: ctest --test-dir out/windows -C Release --output-on-failure
+
+      - name: Install WiX
+        run: dotnet tool install --global wix --version 5.0.2
+
+      - name: Package MSI
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts
+          Copy-Item out/windows/Release/Compositor.exe artifacts/Compositor-Windows-x64.exe
+          wix build windows/installer/Compositor.wxs `
+            -d AppSource="$pwd/out/windows/Release/Compositor.exe" `
+            -arch x64 `
+            -o artifacts/Compositor-Windows-x64.msi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Compositor-Windows-x64
+          path: artifacts/*
+          if-no-files-found: error
+
